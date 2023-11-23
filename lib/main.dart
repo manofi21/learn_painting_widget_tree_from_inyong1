@@ -32,13 +32,31 @@ class WidgetTreeLayout extends StatefulWidget {
 }
 
 class _WidgetTreeLayoutState extends State<WidgetTreeLayout> {
+  final key = GlobalKey();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: CustomPaint(
-          painter: _ConnectionPainter(),
-          // size: const Size(60, double.infinity),
+        child: Row(
+          children: [
+            CustomPaint(
+              painter: _ConnectionPainter(key),
+              size: const Size(100, double.infinity),
+            ),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const SizedBox(height: 20),
+                  Container(
+                    key: key,
+                    child: const Text('Test'),
+                  )
+                ],
+              ),
+            )
+          ],
         ),
       ),
     );
@@ -46,8 +64,11 @@ class _WidgetTreeLayoutState extends State<WidgetTreeLayout> {
 }
 
 class _ConnectionPainter extends CustomPainter {
+  final GlobalKey key;
+  _ConnectionPainter(this.key);
   @override
   void paint(Canvas canvas, Size size) {
+    double firstOffset = -1;
     late double heightOfLine; // Untuk ukuran lebar height
     late Offset endOfLine; // Untuk titik akhir dengan x dan y
 
@@ -62,8 +83,12 @@ class _ConnectionPainter extends CustomPainter {
 
     final path = Path();
 
-    heightOfLine = 40;
-    endOfLine = Offset(50, heightOfLine);
+    RenderBox renderBox = key.currentContext?.findRenderObject() as RenderBox;
+    Size widgetSize = renderBox.size;
+    Offset widgetPosition = renderBox.localToGlobal(Offset.zero);
+
+    heightOfLine = widgetPosition.dy - firstOffset + widgetSize.height / 2;
+    endOfLine = Offset(size.width * 0.8, heightOfLine);
 
     path.moveTo(15, 0);
     path.lineTo(15, heightOfLine - 20);

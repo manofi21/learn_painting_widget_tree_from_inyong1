@@ -25,6 +25,7 @@ class _ConnectionPainter extends CustomPainter {
 
     final path = Path();
 
+    // Would be set later. Just dummy right now
     heightOfLine = 40;
     endOfLine = Offset(50, heightOfLine);
 
@@ -62,6 +63,49 @@ class _WidgetTreeLayoutState extends State<WidgetTreeLayout> {
         child: CustomPaint(
           painter: _ConnectionPainter(),
           size: const Size(60, double.infinity),
+        ),
+      ),
+    );
+  }
+}
+```
+
+2. Mencoba menambahkan widget agar berada di sebelah garis. Dan menyesuai dengan titik pada custom paint.
+Buat `GlobalKey` agar dipasangkan ke widget yang ingin dipasangkan di sebelah garis. Bungkus CustomPaint dalam row, dan tambahkan widget yang dipasangkan kiri baris.
+```dart
+class WidgetTreeLayout extends StatefulWidget {
+  const WidgetTreeLayout({super.key});
+
+  @override
+  State<WidgetTreeLayout> createState() => _WidgetTreeLayoutState();
+}
+
+class _WidgetTreeLayoutState extends State<WidgetTreeLayout> {
+  final key = GlobalKey();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: SafeArea(
+        child: Row(
+          children: [
+            CustomPaint(
+              painter: _ConnectionPainter(key),
+              size: const Size(100, double.infinity),
+            ),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const SizedBox(height: 20),
+                  Container(
+                    key: key,
+                    child: const Text('Test'),
+                  )
+                ],
+              ),
+            )
+          ],
         ),
       ),
     );
