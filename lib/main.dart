@@ -44,9 +44,8 @@ class _WidgetTreeLayoutState extends State<WidgetTreeLayout> {
               painter: _ConnectionPainter(key),
               size: const Size(100, double.infinity),
             ),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
+            Column(
+                // crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   const SizedBox(height: 20),
                   Container(
@@ -55,7 +54,6 @@ class _WidgetTreeLayoutState extends State<WidgetTreeLayout> {
                   )
                 ],
               ),
-            )
           ],
         ),
       ),
