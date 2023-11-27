@@ -140,3 +140,74 @@ Lalu dengan menggunakan informasi ini, variable `heightOfLine` dan `endOfLine` b
     endOfLine = Offset(size.width * 0.8, heightOfLine);
   ...
 ```
+
+3. Menyoba menyisipkan widget lebih dari 1.
+Pada `WidgetTreeLayout` (dalam `_WidgetTreeLayoutState` lebih tepatnya) tambahkan variable baru untuk kebutuhan multple widgetnya
+```dart
+  final keys = <GlobalKey>[];
+  late List<Widget> children;
+```
+
+Kemudian dibagian init state, coba tambahkan dummy widget yang akan di set di variable childrennya.
+```dart
+  @override
+  void initState() {
+    children = [
+      const Text("data"),
+      Row(
+        children: [
+          Checkbox(value: true, onChanged: (value) {}),
+          const Text('data'),
+        ],
+      ),
+      const IntrinsicWidth(
+        child: ExpansionTile(
+          title: Text('data'),
+          children: [
+            Text('data'),
+          ],
+        ),
+      )
+    ];
+
+    keys.addAll(List.generate(children.length, (index) => GlobalKey()));
+    super.initState();
+  }
+```
+
+Kemudian pindah ke `_ConnectionPainter` untuk mengganti variabel dari single GlobalKey ke 
+`List<GlobalKey>` dan bungkus bagian variable path sampai drawOval dengan `for` untuk melakukan looping drawnya sesuai dengan banyak key dari varibale.
+
+```dart
+  for (final key in keys) {
+    final path = Path();
+    ....
+    canvas.drawOval(Rect.fromCenter(center: endOfLine, width: 10, height: 10),
+        circlePaint);
+  }
+```
+
+Lalu implementasikan di `WidgetTreeLayout`
+```dart
+  child: Row(
+    children: [
+      CustomPaint(
+        painter: _ConnectionPainter(keys),
+        size: const Size(100, double.infinity),
+      ),
+      Column(
+        // crossAxisAlignment: CrossAxisAlignment.stretch,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 20),
+          for (int i = 0; i < children.length; i++) ...{
+            Container(
+              key: keys[i],
+              child: children[i],
+            ),
+          }
+        ],
+      ),
+    ],
+  ),
+```

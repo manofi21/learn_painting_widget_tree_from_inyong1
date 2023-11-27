@@ -32,7 +32,32 @@ class WidgetTreeLayout extends StatefulWidget {
 }
 
 class _WidgetTreeLayoutState extends State<WidgetTreeLayout> {
-  final key = GlobalKey();
+  final keys = <GlobalKey>[];
+  late List<Widget> children;
+
+  @override
+  void initState() {
+    children = [
+      const Text("data"),
+      Row(
+        children: [
+          Checkbox(value: true, onChanged: (value) {}),
+          const Text('data'),
+        ],
+      ),
+      const IntrinsicWidth(
+        child: ExpansionTile(
+          title: Text('data'),
+          children: [
+            Text('data'),
+          ],
+        ),
+      )
+    ];
+
+    keys.addAll(List.generate(children.length, (index) => GlobalKey()));
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -41,19 +66,22 @@ class _WidgetTreeLayoutState extends State<WidgetTreeLayout> {
         child: Row(
           children: [
             CustomPaint(
-              painter: _ConnectionPainter(key),
+              painter: _ConnectionPainter(keys),
               size: const Size(100, double.infinity),
             ),
             Column(
-                // crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const SizedBox(height: 20),
+              // crossAxisAlignment: CrossAxisAlignment.stretch,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 20),
+                for (int i = 0; i < children.length; i++) ...{
                   Container(
-                    key: key,
-                    child: const Text('Test'),
-                  )
-                ],
-              ),
+                    key: keys[i],
+                    child: children[i],
+                  ),
+                }
+              ],
+            ),
           ],
         ),
       ),
@@ -62,8 +90,8 @@ class _WidgetTreeLayoutState extends State<WidgetTreeLayout> {
 }
 
 class _ConnectionPainter extends CustomPainter {
-  final GlobalKey key;
-  _ConnectionPainter(this.key);
+  final List<GlobalKey> keys;
+  _ConnectionPainter(this.keys);
   @override
   void paint(Canvas canvas, Size size) {
     double firstOffset = -1;
@@ -79,23 +107,32 @@ class _ConnectionPainter extends CustomPainter {
       ..color = Colors.blue.shade800
       ..style = PaintingStyle.fill;
 
-    final path = Path();
+    for (final key in keys) {
+      final path = Path();
 
-    RenderBox renderBox = key.currentContext?.findRenderObject() as RenderBox;
-    Size widgetSize = renderBox.size;
-    Offset widgetPosition = renderBox.localToGlobal(Offset.zero);
+      RenderBox renderBox = key.currentContext?.findRenderObject() as RenderBox;
+      Size widgetSize = renderBox.size;
+      Offset widgetPosition = renderBox.localToGlobal(Offset.zero);
 
-    heightOfLine = widgetPosition.dy - firstOffset + widgetSize.height / 2;
-    endOfLine = Offset(size.width * 0.8, heightOfLine);
+      heightOfLine = widgetPosition.dy - firstOffset + widgetSize.height / 2;
+      endOfLine = Offset(size.width * 0.8, heightOfLine);
 
-    path.moveTo(15, 0);
-    path.lineTo(15, heightOfLine - 20);
-    path.arcToPoint(Offset(30, heightOfLine),
-        radius: const Radius.circular(25), clockwise: false);
-    path.lineTo(endOfLine.dx, endOfLine.dy);
-    canvas.drawPath(path, linePaint);
-    canvas.drawOval(
-        Rect.fromCenter(center: endOfLine, width: 10, height: 10), circlePaint);
+      path.moveTo(15, 0);
+      path.lineTo(15, heightOfLine - 20);
+      path.arcToPoint(
+        Offset(30, heightOfLine),
+        radius: const Radius.circular(25),
+        clockwise: false,
+      );
+      path.lineTo(endOfLine.dx, endOfLine.dy);
+
+      // Menggabar sekujur garis
+      canvas.drawPath(path, linePaint);
+
+      // Menggabar titi bulat di widget
+      canvas.drawOval(Rect.fromCenter(center: endOfLine, width: 10, height: 10),
+          circlePaint);
+    }
   }
 
   @override
